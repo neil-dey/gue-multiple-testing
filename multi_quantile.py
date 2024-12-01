@@ -3,13 +3,14 @@ import scipy.stats as st
 import matplotlib.pyplot as plt
 from itertools import product as cart_prod
 import pickle
+import sys
 
 from sklearn.linear_model import QuantileRegressor
 
 np.random.seed(1)
 
 MODELS = ["triangle", "trapezoid", "fan"]
-model = MODELS[0]
+model = MODELS[int(sys.argv[1])]
 
 def generate(xs, easyness):
     if model == "triangle":
