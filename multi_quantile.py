@@ -9,7 +9,7 @@ from sklearn.linear_model import QuantileRegressor
 np.random.seed(1)
 
 MODELS = ["triangle", "trapezoid", "fan"]
-model = MODELS[2]
+model = MODELS[0]
 
 def generate(xs, easyness):
     if model == "triangle":
@@ -98,19 +98,16 @@ boot_iters = 100
 num_taus = 48
 coverages = np.zeros(num_taus)
 for easiness in easinesses:
-    easiness = 1
-    population = generate(xvals, easiness)
-    xs, ys = zip(*population)
-    plt.scatter(xs, ys)
-    plt.show()
-    exit()
     coverages = np.zeros(num_taus)
     coverage = 0
+    FDR = 0
 
     grid = np.linspace(0.02, 0.98, num = num_taus)
     tau_omegas = dict()
     for tau in grid:
         tau_omegas[tau] = []
+
+    population = generate(xvals, easiness)
     for _ in range(boot_iters):
         sample = population[np.random.choice(len(population), 50)]
         xs, ys = zip(*sample)
@@ -132,22 +129,25 @@ for easiness in easinesses:
         coverage += combined_eval <= 1/alpha
 
         # Checks the e-BH FDR
-        #coverage += max([k * e/len(evals) for (k, e) in enumerate(evals)]) <= 1/alpha
+        FDR += max([k * e/len(evals) for (k, e) in enumerate(evals)]) <= 1/alpha
 
-        num_rejections = sum([k * e/len(evals) >= 1/alpha for (k, e) in enumerate(evals)])
+        #num_rejections = sum([k * e/len(evals) >= 1/alpha for (k, e) in enumerate(evals)])
+        #print(num_rejections)
 
 
     print(tau_omegas)
     print(easiness, coverage/boot_iters)
+    print(FDR/boot_iters)
     typeIIrates.append(coverage/boot_iters)
-    pickle.dump(tau_omegas, open("tau_dict_trapezoid_deltahalf.pkl"))
-    break
+    #pickle.dump(tau_omegas, open("tau_dict_trapezoid_deltahalf.pkl"))
 
 # Power as function of sample size plot
 # Easiness 0.3, family = triangle
-#power_ns = [(10.0, 0.97), (20.0, 0.96), (30.0, 0.96), (40.0, 0.94), (50.0, 0.95), (60.0, 0.87), (70.0, 0.88), (80.0, 0.87), (90.0, 0.87), (100.0, 0.84), (110.0, 0.91), (120.0, 0.79), (130.0, 0.88), (140.0, 0.81), (150.0, 0.79), (160.0, 0.77), (170.0, 0.83), (180.0, 0.74), (190.0, 0.67), (200.0, 0.54), (210.0, 0.53), (220.0, 0.46), (230.0, 0.44), (240.0, 0.29), (250.0, 0.33), (260.0, 0.33), (270.0, 0.2), (280.0, 0.15), (290.0, 0.1), (300.0, 0.08), (310.0, 0.06), (320.0, 0.02), (330.0, 0.0), (340.0, 0.01), (350.0, 0.0), (360.0, 0.01), (370.0, 0.0), (380.0, 0.0), (390.0, 0.0), (400.0, 0.0), (410.0, 0.0), (420.0, 0.0), (430.0, 0.0), (440.0, 0.0), (450.0, 0.0), (460.0, 0.0), (470.0, 0.0), (480.0, 0.0), (490.0, 0.0), (500.0, 0.0), (510.0, 0.0), (520.0, 0.0), (530.0, 0.0), (540.0, 0.0), (550.0, 0.0), (560.0, 0.0), (570.0, 0.0), (580.0, 0.0), (590.0, 0.0), (600.0, 0.0), (610.0, 0.0), (620.0, 0.0), (630.0, 0.0), (650.0, 0.0), (660.0, 0.0), (680.0, 0.0), (690.0, 0.0), (710.0, 0.0)]
+if model == "triangle":
+    power_ns = [(10.0, 0.97), (20.0, 0.96), (30.0, 0.96), (40.0, 0.94), (50.0, 0.95), (60.0, 0.87), (70.0, 0.88), (80.0, 0.87), (90.0, 0.87), (100.0, 0.84), (110.0, 0.91), (120.0, 0.79), (130.0, 0.88), (140.0, 0.81), (150.0, 0.79), (160.0, 0.77), (170.0, 0.83), (180.0, 0.74), (190.0, 0.67), (200.0, 0.54), (210.0, 0.53), (220.0, 0.46), (230.0, 0.44), (240.0, 0.29), (250.0, 0.33), (260.0, 0.33), (270.0, 0.2), (280.0, 0.15), (290.0, 0.1), (300.0, 0.08), (310.0, 0.06), (320.0, 0.02), (330.0, 0.0), (340.0, 0.01), (350.0, 0.0), (360.0, 0.01), (370.0, 0.0), (380.0, 0.0), (390.0, 0.0), (400.0, 0.0), (410.0, 0.0), (420.0, 0.0), (430.0, 0.0), (440.0, 0.0), (450.0, 0.0), (460.0, 0.0), (470.0, 0.0), (480.0, 0.0), (490.0, 0.0), (500.0, 0.0), (510.0, 0.0), (520.0, 0.0), (530.0, 0.0), (540.0, 0.0), (550.0, 0.0), (560.0, 0.0), (570.0, 0.0), (580.0, 0.0), (590.0, 0.0), (600.0, 0.0), (610.0, 0.0), (620.0, 0.0), (630.0, 0.0), (650.0, 0.0), (660.0, 0.0), (680.0, 0.0), (690.0, 0.0), (710.0, 0.0)]
 # Easiness 0.3, family = trapezoid
-power_ns = [(10.0, 0.97), (20.0, 0.97), (30.0, 0.96), (40.0, 0.93), (50.0, 0.96), (60.0, 0.88), (70.0, 0.83), (80.0, 0.85), (90.0, 0.86), (100.0, 0.82), (110.0, 0.87), (120.0, 0.82), (130.0, 0.76), (140.0, 0.69), (150.0, 0.52), (160.0, 0.55), (170.0, 0.44), (180.0, 0.4), (190.0, 0.37), (200.0, 0.21), (210.0, 0.13), (220.0, 0.11), (230.0, 0.12), (240.0, 0.13), (250.0, 0.03), (260.0, 0.03), (270.0, 0.01), (280.0, 0.0), (290.0, 0.0), (300.0, 0.0), (310.0, 0.0), (320.0, 0.0), (330.0, 0.0), (340.0, 0.0), (350.0, 0.0), (360.0, 0.0), (370.0, 0.0), (380.0, 0.0), (390.0, 0.0), (400.0, 0.0), (410.0, 0.0), (420.0, 0.0), (430.0, 0.0), (440.0, 0.0), (450.0, 0.0), (460.0, 0.0), (470.0, 0.0), (480.0, 0.0), (490.0, 0.0), (500.0, 0.0)]
+else:
+    power_ns = [(10.0, 0.97), (20.0, 0.97), (30.0, 0.96), (40.0, 0.93), (50.0, 0.96), (60.0, 0.88), (70.0, 0.83), (80.0, 0.85), (90.0, 0.86), (100.0, 0.82), (110.0, 0.87), (120.0, 0.82), (130.0, 0.76), (140.0, 0.69), (150.0, 0.52), (160.0, 0.55), (170.0, 0.44), (180.0, 0.4), (190.0, 0.37), (200.0, 0.21), (210.0, 0.13), (220.0, 0.11), (230.0, 0.12), (240.0, 0.13), (250.0, 0.03), (260.0, 0.03), (270.0, 0.01), (280.0, 0.0), (290.0, 0.0), (300.0, 0.0), (310.0, 0.0), (320.0, 0.0), (330.0, 0.0), (340.0, 0.0), (350.0, 0.0), (360.0, 0.0), (370.0, 0.0), (380.0, 0.0), (390.0, 0.0), (400.0, 0.0), (410.0, 0.0), (420.0, 0.0), (430.0, 0.0), (440.0, 0.0), (450.0, 0.0), (460.0, 0.0), (470.0, 0.0), (480.0, 0.0), (490.0, 0.0), (500.0, 0.0)]
 xs, ys = zip(*power_ns)
 plt.scatter(xs, ys)
 plt.xlim((0,400))
@@ -157,24 +157,29 @@ plt.savefig("n_power_" + model + ".png")
 plt.clf()
 
 # Learning rates plots
-tau_omegas = pickle.load(open("tau_dict_trapezoid_delta0.pkl", "rb"))
+tau_omegas = pickle.load(open("tau_dict_" + model + "_delta0.pkl", "rb"))
+
+if model == "triangle":
+    legendlabel = "Δ"
+else:
+    legendlabel = "Γ"
 
 xs = [tau for tau in tau_omegas][1:-2]
 ys = [np.mean(omegas) for omegas in tau_omegas.values()][1:-2]
 errs = [np.var(omegas, ddof=1)**0.5/len(tau_omegas)**0.5 for omegas in tau_omegas.values()][1:-2]
-plt.scatter(xs, ys, label = "Δ = 0", marker = ".")
+plt.scatter(xs, ys, label = (legendlabel + " = 0"), marker = ".")
 plt.errorbar(xs, ys, yerr=errs, fmt='none')
 
-tau_omegas = pickle.load(open("tau_dict_trapezoid_deltahalf.pkl", "rb"))
+tau_omegas = pickle.load(open("tau_dict_" + model + "_deltahalf.pkl", "rb"))
 ys = [np.mean(omegas) for omegas in tau_omegas.values()][1:-2]
 errs = [np.var(omegas, ddof=1)**0.5/len(tau_omegas)**0.5 for omegas in tau_omegas.values()][1:-2]
-plt.scatter(xs, ys, label = "Δ = 0.5", marker = "+")
+plt.scatter(xs, ys, label = (legendlabel + " = 0.5"), marker = "+")
 plt.errorbar(xs, ys, yerr=errs, fmt='none', color = 'orange')
 
-tau_omegas = pickle.load(open("tau_dict_trapezoid_delta1.pkl", "rb"))
+tau_omegas = pickle.load(open("tau_dict_" + model + "_delta1.pkl", "rb"))
 ys = [np.mean(omegas) for omegas in tau_omegas.values()][1:-2]
 errs = [np.var(omegas, ddof=1)**0.5/len(tau_omegas)**0.5 for omegas in tau_omegas.values()][1:-2]
-plt.scatter(xs, ys, label = "Δ = 1", marker = "x")
+plt.scatter(xs, ys, label = (legendlabel + " = 1"), marker = "x")
 plt.errorbar(xs, ys, yerr=errs, fmt='none', color = 'green')
 
 
@@ -184,7 +189,6 @@ plt.legend()
 plt.ylim((0, 60))
 plt.savefig("lr_errs_" + model + ".png")
 plt.clf()
-exit()
 
 #BH-combined
 
@@ -214,8 +218,11 @@ easinesses = [x for (x, y) in TypeIIrates]
 typeIIrates = [y for (x, y) in TypeIIrates]
 print([x for x in np.linspace(0, 1, num = 100) if x not in easinesses])
 plt.scatter(easinesses, typeIIrates)
-plt.xlabel("Δ")
+if model == "triangle":
+    plt.xlabel("Δ")
+else:
+    plt.xlabel("Γ")
 plt.ylabel("Type II error")
 plt.ylim(0, 1)
 #plt.show()
-plt.savefig("powercuve_" + model + ".png")
+plt.savefig("powercuve_BH_" + model + ".png")
